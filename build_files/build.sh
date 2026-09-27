@@ -66,7 +66,9 @@ dnf5 install -y --setopt=install_weak_deps=False \
 if [[ "${nvidia}" == "true" ]]; then
     test -x /tmp/akmods-nvidia/ublue-os/nvidia-install.sh
 
-    AKMODNV_PATH=/tmp/akmods-nvidia \
+    IMAGE_NAME=fedora-lxqt \
+        MULTILIB=0 \
+        AKMODNV_PATH=/tmp/akmods-nvidia \
         /tmp/akmods-nvidia/ublue-os/nvidia-install.sh
 fi
 # The installed host uses networkd. NetworkManager may still exist in the
