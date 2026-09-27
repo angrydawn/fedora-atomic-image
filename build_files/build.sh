@@ -24,7 +24,7 @@ desktop_packages=(
   lxqt-session
   lxqt-wayland-session
   pcmanfm-qt
-  qterminal
+  ghostty
 )
 
 platform_packages=(
@@ -58,8 +58,14 @@ platform_packages=(
   zram-generator-defaults
 )
 
+# Ghostty is not packaged in Fedora's official repositories. This COPR
+# currently provides Fedora 44 builds and is enabled only during image builds.
+dnf5 -y copr enable scottames/ghostty
+
 dnf5 install -y --setopt=install_weak_deps=False \
   "${desktop_packages[@]}" "${platform_packages[@]}"
+
+dnf5 -y copr disable scottames/ghostty
 
 # The GTX 1650 SUPER is Turing and supported by NVIDIA's open kernel modules.
 # UBlue's staged installer installs a kernel-matched, signed kmod and userspace.
