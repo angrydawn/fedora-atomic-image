@@ -27,7 +27,7 @@ jobs:
         with:
           builder-image: quay.io/centos-bootc/bootc-image-builder:latest
           image: ${{ env.IMAGE }}:nvidia
-          types: bootc-generic-iso
+          types: bootc-installer
           config-file: ./disk_config/iso.toml
           additional-args: --use-librepo=True
       - uses: actions/upload-artifact@v4
