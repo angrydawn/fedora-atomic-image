@@ -1,0 +1,37 @@
+name: Build installer ISO
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/fedora-lxqt
+
+jobs:
+  iso:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Free runner disk space
+        uses: ublue-os/remove-unwanted-software@v9
+      - name: Lowercase image name
+        run: echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV"
+      - name: Put target image in installer config
+        run: sed -i "s|@@IMAGE@@|${IMAGE}:nvidia|" disk_config/iso.toml
+      - name: Build bootc installer ISO
+        id: build
+        uses: osbuild/bootc-image-builder-action@8661cd3832544ad68c12dcde8681b13ab0f56a8d
+        with:
+          builder-image: quay.io/centos-bootc/bootc-image-builder:latest
+          image: ${{ env.IMAGE }}:nvidia
+          types: bootc-generic-iso
+          config-file: disk_config/iso.toml
+          additional-args: --use-librepo=True
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fedora-lxqt-installer
+          path: ${{ steps.build.outputs.output-directory }}
+          compression-level: 0

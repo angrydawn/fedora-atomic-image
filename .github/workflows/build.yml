@@ -1,0 +1,82 @@
+name: Build and publish bootc images
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+concurrency:
+  group: image-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/fedora-lxqt
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tag: latest
+            nvidia: "false"
+          - tag: nvidia
+            nvidia: "true"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free runner disk space
+        uses: ublue-os/remove-unwanted-software@v9
+
+      - name: Lowercase image name
+        run: echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV"
+
+      - name: Build
+        env:
+          AUTOLOGIN_USER: ${{ vars.AUTOLOGIN_USER || 'user' }}
+        run: |
+          podman build \
+            --pull=newer \
+            --build-arg FEDORA_VERSION=44 \
+            --build-arg NVIDIA=${{ matrix.nvidia }} \
+            --build-arg "AUTOLOGIN_USER=${AUTOLOGIN_USER}" \
+            --label org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }} \
+            --label org.opencontainers.image.revision=${{ github.sha }} \
+            --tag local/fedora-lxqt:${{ matrix.tag }} .
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish
+        if: github.event_name != 'pull_request'
+        id: publish
+        run: |
+          digest=$(podman push --digestfile=/tmp/digest \
+            local/fedora-lxqt:${{ matrix.tag }} \
+            "${IMAGE}:${{ matrix.tag }}" >/dev/null && cat /tmp/digest)
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+      - name: Install cosign
+        if: github.event_name != 'pull_request'
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign with GitHub OIDC
+        if: github.event_name != 'pull_request'
+        env:
+          DIGEST: ${{ steps.publish.outputs.digest }}
+        run: cosign sign --yes "${IMAGE}@${DIGEST}"
