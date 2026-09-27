@@ -95,4 +95,8 @@ EOF
 
 # Image builds must not carry package-manager caches or machine-specific state.
 dnf5 clean all
-rm -rf /var/cache/dnf /var/log/dnf* /var/lib/dnf/history* /tmp/*
+rm -rf /var/cache/dnf /var/log/dnf* /var/lib/dnf/history*
+# /tmp/akmods-nvidia is a read-only BuildKit mount and vanishes after this RUN.
+# Clean other temporary entries without attempting to modify that mount.
+find /tmp -mindepth 1 -maxdepth 1 ! -name akmods-nvidia \
+    -exec rm -rf -- {} +
