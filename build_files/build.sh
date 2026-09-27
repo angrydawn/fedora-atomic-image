@@ -30,6 +30,7 @@ desktop_packages=(
 
 platform_packages=(
   cryptsetup
+  fastfetch
   firewalld
   flatpak
   fwupd
