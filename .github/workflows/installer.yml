@@ -21,13 +21,14 @@ jobs:
         run: echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV"
       - name: Put target image in installer config
         run: sed -i "s|@@IMAGE@@|${IMAGE}:nvidia|" disk_config/iso.toml
-      - name: Build bootc installer ISO
+      - name: Build Anaconda installer ISO
         id: build
         uses: osbuild/bootc-image-builder-action@8661cd3832544ad68c12dcde8681b13ab0f56a8d
         with:
           builder-image: quay.io/centos-bootc/bootc-image-builder:latest
           image: ${{ env.IMAGE }}:nvidia
-          types: bootc-installer
+          types: anaconda-iso
+          rootfs: btrfs
           config-file: ./disk_config/iso.toml
           additional-args: --use-librepo=True
       - uses: actions/upload-artifact@v4

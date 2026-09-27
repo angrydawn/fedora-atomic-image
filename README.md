@@ -89,7 +89,10 @@ The installer workflow substitutes your actual lowercase GHCR owner into its
 configuration and installs the `nvidia` stream. Change both `:nvidia`
 occurrences in `installer.yml` to `:latest` for the Mesa/Nouveau image.
 
-The current bootc installer ISO path is still evolving. Test the artifact in a VM
+The installer uses Image Builder's `anaconda-iso` path because it accepts the
+LXQt image directly as its payload; the newer `bootc-installer` type instead
+requires a separate Anaconda-containing bootc image plus a payload reference.
+Test the artifact in a VM
 before installing physical hardware and retain a Fedora rescue USB.
 
 ## Rebase an existing Fedora Atomic system
