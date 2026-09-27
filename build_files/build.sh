@@ -12,6 +12,7 @@ fi
 # Keep this explicit. In particular, do not install @lxqt-desktop-environment:
 # it may grow an X11 session or applications which do not belong in the OS.
 desktop_packages=(
+  breeze-icon-theme
   labwc
   lxqt-config
   lxqt-labwc-session
