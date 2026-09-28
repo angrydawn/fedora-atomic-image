@@ -15,6 +15,7 @@ desktop_packages=(
   labwc
   noctalia
   ghostty
+  gh
 )
 
 platform_packages=(
