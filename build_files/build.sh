@@ -15,7 +15,6 @@ desktop_packages=(
   labwc
   noctalia
   ghostty
-  gh
 )
 
 platform_packages=(
@@ -42,6 +41,9 @@ platform_packages=(
   udisks2
   pass
   slurp
+  gh
+  feh
+  mpv
   wl-clipboard
   wlr-randr
   wireplumber
