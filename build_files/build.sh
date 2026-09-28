@@ -19,6 +19,7 @@ desktop_packages=(
 
 platform_packages=(
   cryptsetup
+  dbus-daemon
   fastfetch
   firewalld
   fish
@@ -57,6 +58,9 @@ dnf5 install -y --setopt=install_weak_deps=False \
   "${desktop_packages[@]}" "${platform_packages[@]}"
 
 dnf5 -y copr disable scottames/ghostty
+
+# Fail the image build if a dependency change removes a session-critical tool.
+command -v dbus-run-session labwc noctalia ghostty >/dev/null
 
 # The GTX 1650 SUPER is Turing and supported by NVIDIA's open kernel modules.
 # UBlue's staged installer installs a kernel-matched, signed kmod and userspace.
