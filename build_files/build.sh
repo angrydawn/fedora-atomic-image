@@ -41,11 +41,13 @@ platform_packages=(
   distrobox
   udisks2
   pass
+  slurp
   wl-clipboard
   wlr-randr
   wireplumber
   xdg-desktop-portal
   xdg-desktop-portal-gtk
+  xdg-desktop-portal-wlr
   xdg-user-dirs
   xorg-x11-server-Xwayland
   zram-generator-defaults
