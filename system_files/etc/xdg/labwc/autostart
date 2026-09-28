@@ -1,0 +1,8 @@
+# Noctalia provides the bar, launcher, notifications, wallpaper and controls.
+noctalia_config_dir="${XDG_CONFIG_HOME:-${HOME}/.config}/noctalia"
+if [ ! -e "${noctalia_config_dir}/config.toml" ]; then
+    install -D -m 0644 /etc/skel/.config/noctalia/config.toml \
+        "${noctalia_config_dir}/config.toml"
+fi
+
+noctalia --daemon

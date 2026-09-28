@@ -1,6 +1,6 @@
-# Fedora LXQt Atomic
+# Fedora Noctalia Atomic
 
-A GNOME-free Fedora 44 Atomic desktop image with LXQt 2.x, labwc, automatic
+A GNOME- and LXQt-free Fedora 44 Atomic desktop image with Noctalia, labwc, automatic
 tty1 login, Flatpak, Toolbx, and Distrobox. The host is delivered as a signed OCI
 bootc image; desktop packages are composed into the image rather than layered
 after installation.
@@ -10,8 +10,8 @@ wired Ethernet interfaces. NetworkManager Wi-Fi support is not installed and
 NetworkManager is masked in the deployed system.
 Bluetooth userspace is not installed, and `bluetooth.service` is masked.
 
-tty1 is configured for passwordless autologin and immediately starts the LXQt
-Wayland session. Set the GitHub Actions repository
+tty1 is configured for passwordless autologin and immediately starts labwc;
+labwc then starts Noctalia. Set the GitHub Actions repository
 variable `AUTOLOGIN_USER` to the exact login name you will create in Anaconda
 (the default is `user`). This is intentionally not suitable for a shared or
 physically untrusted machine; LUKS protects data only while the machine is off.
@@ -33,15 +33,16 @@ an akmod at first boot on an immutable host.
 ```text
 Containerfile                  image composition and optional NVIDIA stage
 build_files/build.sh           explicit Fedora package set and service setup
-system_files/etc/              LXQt/labwc, networkd, and session-start defaults
+system_files/etc/              Noctalia/labwc, networkd, and session defaults
 .github/workflows/build.yml    daily/commit builds, GHCR publishing, signing
 .github/workflows/installer.yml on-demand bootc installer ISO
 disk_config/iso.toml           Anaconda modules and installed image reference
 ```
 
-`lxqt-x11-session` is deliberately absent. `xorg-x11-server-Xwayland` remains
-for legacy applications. Fedora's `lxqt-labwc-session` supplies the integrated
-LXQt Wayland session; `/etc/xdg/lxqt/session.conf` makes labwc the default.
+No LXQt session or application is installed. `xorg-x11-server-Xwayland` remains
+only for legacy applications. The tty1 login launches labwc directly and
+`/etc/xdg/labwc/autostart` launches Noctalia in daemon mode. Noctalia's built-in
+Polkit agent is enabled in the default user configuration.
 
 ## Create and publish your image
 
@@ -90,7 +91,7 @@ configuration and installs the `nvidia` stream. Change both `:nvidia`
 occurrences in `installer.yml` to `:latest` for the Mesa/Nouveau image.
 
 The installer uses Image Builder's `anaconda-iso` path because it accepts the
-LXQt image directly as its payload; the newer `bootc-installer` type instead
+custom image directly as its payload; the newer `bootc-installer` type instead
 requires a separate Anaconda-containing bootc image plus a payload reference.
 Test the artifact in a VM
 before installing physical hardware and retain a Fedora rescue USB.
@@ -206,11 +207,9 @@ must have a matching `main-N` publication before the build can succeed.
   official desktop release validation.
 - The NVIDIA path depends on Universal Blue's akmods publishing service. CI
   should be treated as a gate: never deploy a failed or untested daily build.
-- A tty1 autologin starts LXQt (Wayland) under labwc without a display manager.
-  Other virtual consoles and SSH sessions remain ordinary shell logins. No
-  native X11 LXQt session is installed.
-- The generic GTK portal is retained as a fallback for portal interfaces not
-  implemented by the LXQt backend.
+- A tty1 autologin starts labwc (Wayland) without a display manager, and labwc
+  starts Noctalia. Other virtual consoles and SSH remain ordinary shell logins.
+- The generic GTK portal supplies file chooser and related desktop portals.
 - The default network file configures every Ethernet link with DHCP. For a
   static address or multiple NICs, replace
   `system_files/etc/systemd/network/20-wired.network` with a narrower match and

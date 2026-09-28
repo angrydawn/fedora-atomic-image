@@ -9,22 +9,11 @@ if [[ ! "${autologin_user}" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
   exit 2
 fi
 
-# Keep this explicit. In particular, do not install @lxqt-desktop-environment:
-# it may grow an X11 session or applications which do not belong in the OS.
+# Keep the shell package list explicit so the image does not acquire a full
+# desktop-environment package group or unrelated applications.
 desktop_packages=(
-  breeze-icon-theme
   labwc
-  lxqt-config
-  lxqt-labwc-session
-  lxqt-notificationd
-  lxqt-openssh-askpass
-  lxqt-panel
-  lxqt-policykit
-  lxqt-powermanagement
-  lxqt-runner
-  lxqt-session
-  lxqt-wayland-session
-  pcmanfm-qt
+  noctalia
   ghostty
 )
 
@@ -32,6 +21,7 @@ platform_packages=(
   cryptsetup
   fastfetch
   firewalld
+  fish
   flatpak
   fwupd
   git-core
@@ -54,7 +44,6 @@ platform_packages=(
   wireplumber
   xdg-desktop-portal
   xdg-desktop-portal-gtk
-  xdg-desktop-portal-lxqt
   xdg-user-dirs
   xorg-x11-server-Xwayland
   zram-generator-defaults
@@ -92,7 +81,7 @@ systemctl mask bluetooth.service
 systemctl enable firewalld.service
 systemctl set-default graphical.target
 
-# Autologin on tty1; the login-shell profile starts LXQt/labwc. This keeps a
+# Autologin on tty1; the login-shell profile starts labwc. This keeps a
 # proper PAM/logind session without carrying a graphical display manager.
 install -d -m 0755 /etc/systemd/system/getty@tty1.service.d
 cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf <<EOF
