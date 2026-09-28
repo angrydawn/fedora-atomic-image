@@ -95,6 +95,28 @@ ExecStart=
 ExecStart=-/usr/sbin/agetty --autologin ${autologin_user} --noclear %I \$TERM
 EOF
 
+# Without a display manager, the user's systemd session (and its cgroup
+# delegation) only exists while a login session is active. Rootless
+# podman/crun needs that delegation to move a process into an already
+# running container's cgroup (e.g. `toolbox enter`, a `podman exec`), and
+# without lingering this fails with "OCI permission denied" on cgroup.procs.
+# Enabling lingering starts user@.service at boot independent of any login.
+cat > /etc/systemd/system/linger-autologin.service <<EOF
+[Unit]
+Description=Enable lingering for ${autologin_user} (rootless podman cgroup delegation)
+After=systemd-logind.service
+Wants=systemd-logind.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/loginctl enable-linger ${autologin_user}
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable linger-autologin.service
+
 # Image builds must not carry package-manager caches or machine-specific state.
 dnf5 clean all
 rm -rf /var/cache/dnf /var/log/dnf* /var/lib/dnf/history*

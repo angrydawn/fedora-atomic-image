@@ -165,6 +165,13 @@ Flatpak is intended for GUI applications, while `toolbox create` or
 `distrobox-create` provides mutable development environments. Keep host
 `rpm-ostree install` use exceptional so deployments remain reproducible.
 
+Because this image has no display manager, the build enables systemd
+lingering for `AUTOLOGIN_USER` (equivalent to `loginctl enable-linger`) so
+rootless podman's cgroup delegation is available at boot rather than only
+while a login session is active. Without it, commands that act on an
+already-running rootless container (`toolbox enter`, `podman exec`) can fail
+with a cgroup permission error.
+
 The host also includes `pass`, GnuPG, `gpg-agent`, Qt pinentry, Git support for
 password-store synchronization, and `wl-clipboard` for copying secrets in the
 Wayland session. Existing stores can be restored under `~/.password-store` and
