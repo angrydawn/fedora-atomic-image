@@ -64,6 +64,10 @@ dnf5 install -y --setopt=install_weak_deps=False \
 
 dnf5 -y copr disable scottames/ghostty
 
+# Firefox ships in the Fedora base image; it is used from Flatpak instead.
+# The langpacks package requires the exact Firefox build, so remove both.
+dnf5 remove -y firefox firefox-langpacks
+
 # Fail the image build if a dependency change removes a session-critical tool.
 command -v dbus-run-session labwc noctalia ghostty >/dev/null
 
